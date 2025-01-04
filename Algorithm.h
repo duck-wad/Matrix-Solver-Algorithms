@@ -13,3 +13,6 @@ std::vector<double> CholeskyDecomposition(const std::vector<std::vector<double>>
 void ForwardElimination(std::vector<std::vector<double>>& A, std::vector<double>& b, std::vector<std::vector<double>>& L);
 //dummy function if an L matrix is not passed in
 void ForwardElimination(std::vector<std::vector<double>>& A, std::vector<double>& b);
+
+std::vector<double> ForwardSubstitution(const std::vector<std::vector<double>>& A, const std::vector<double>& b);
+std::vector<double> BackwardSubstitution(const std::vector<std::vector<double>>& A, const std::vector<double>& b);

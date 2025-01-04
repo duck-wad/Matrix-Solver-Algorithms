@@ -4,6 +4,8 @@
 #include <vector>
 #include <cassert>
 
+const double LOW_TOL = 1e-8;
+
 template<typename T>
 std::vector<T> operator* (const std::vector<T> row, const T c) {
 	std::vector<T> output(row.size());
@@ -48,3 +50,15 @@ std::vector<std::vector<T>> Transpose(const std::vector<std::vector<T>>& matrix)
 	return output;
 }
 
+template<typename T>
+bool isSingular(const std::vector<std::vector<T>>& matrix) {
+
+	bool s = false;
+
+	for (size_t i = 0; i < matrix.size(); i++) {
+		if(matrix[i][i] < LOW_TOL){
+			s = true;
+		}
+	}
+	return s;
+}

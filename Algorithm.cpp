@@ -1,6 +1,7 @@
 #include "Algorithm.h"
 #include "Matrix.h"
 
+//gaussian elimination using forward elimination to get A to REF, and then backward substitution to solve for x
 std::vector<double> GaussianElimination(const std::vector<std::vector<double>>& A, const std::vector<double>& b) {
 
 	if (A.size() != b.size() || A[0].size() != b.size()) {
@@ -12,29 +13,41 @@ std::vector<double> GaussianElimination(const std::vector<std::vector<double>>& 
 	
 	ForwardElimination(A_REF, b_REF);
 
-	std::vector<double> x(b.size());
-
-	//perform backward substitution to solve for x
-	for (size_t i = A_REF.size(); i-- > 0; ) {
-		if (i == A_REF.size() - 1) {
-			x[i] = b_REF[i] / A_REF[i][i];
-		}
-		else {
-			double sum = 0.0;
-			for (size_t j = i + 1; j < A_REF.size(); j++) {
-				sum += A_REF[i][j] * x[j];
-			}
-			x[i] = (b_REF[i] - sum) / A_REF[i][i];
-		}
+	//check if A_REF is singular (zero exists on the diagonal)
+	if (isSingular(A_REF)) {
+		throw std::invalid_argument("Matrix is singular, system cannot be solved for a unique solution");
 	}
+
+	std::vector<double> x = BackwardSubstitution(A_REF, b_REF);
 
 	return x;
 }
 
-//if L is not passed in, dummy function is called which then calls actual function with an empty L
-void ForwardElimination(std::vector<std::vector<double>>& A, std::vector<double>& b) {
-	std::vector<std::vector<double>> L = {};
-	ForwardElimination(A, b, L);
+//LU decomposition uses forward elimination to decompose A into L and U, forward substitution to get D, then backward substitution to get x
+std::vector<double> LUDecomposition(const std::vector<std::vector<double>>& A, const std::vector<double>& b) {
+
+	if (A.size() != b.size() || A[0].size() != b.size()) {
+		throw std::invalid_argument("Matrix and vector must have same dimensions");
+	}
+
+	std::vector<std::vector<double>> U = A;
+	std::vector<double> b_REF = b;
+	std::vector<std::vector<double>> L(A.size(), std::vector<double>(A.size()));
+
+	ForwardElimination(U, b_REF, L);
+
+	//check if A_REF is singular (zero exists on the diagonal)
+	if (isSingular(U)) {
+		throw std::invalid_argument("Matrix is singular, system cannot be solved for a unique solution");
+	}
+
+	//perform forward substitution using L and b to get D
+	//pass b, not b_REF for forwardsub
+	std::vector<double> D = ForwardSubstitution(L, b);
+	//then use backward substitution to get x
+	std::vector<double> x = BackwardSubstitution(U, D);
+
+	return x;
 }
 
 //if L needs to be filled, the function expects L to be sized before being passed in
@@ -66,7 +79,7 @@ void ForwardElimination(std::vector<std::vector<double>>& A, std::vector<double>
 			std::vector<double> pivRow = aug_A[piv] * f;
 			aug_A[i] = aug_A[i] - pivRow;
 			if (fillL) {
-				L[piv][i] = f;
+				L[i][piv] = f;
 			}
 		}
 	}
@@ -77,3 +90,46 @@ void ForwardElimination(std::vector<std::vector<double>>& A, std::vector<double>
 	temp.pop_back();
 	A = Transpose(temp);
 }
+
+//if L is not passed in, dummy function is called which then calls actual function with an empty L
+void ForwardElimination(std::vector<std::vector<double>>& A, std::vector<double>& b) {
+	std::vector<std::vector<double>> L = {};
+	ForwardElimination(A, b, L);
+}
+
+std::vector<double> ForwardSubstitution(const std::vector<std::vector<double>>& A, const std::vector<double>& b) {
+	std::vector<double> x(b.size());
+
+	for (size_t i = 0; i < A.size(); i++) {
+		if (i == 0) {
+			x[i] = b[i] / A[i][i];
+		}
+		else {
+			double sum = 0.0;
+			for (size_t j = 0; j < i; j++) {
+				sum += A[i][j] * x[j];
+			}
+			x[i] = (b[i] - sum) / A[i][i];
+		}
+	}
+	return x;
+}
+
+std::vector<double> BackwardSubstitution(const std::vector<std::vector<double>>& A, const std::vector<double>& b) {
+	
+	std::vector<double> x(b.size());
+	for (size_t i = A.size(); i-- > 0; ) {
+		if (i == A.size() - 1) {
+			x[i] = b[i] / A[i][i];
+		}
+		else {
+			double sum = 0.0;
+			for (size_t j = i + 1; j < A.size(); j++) {
+				sum += A[i][j] * x[j];
+			}
+			x[i] = (b[i] - sum) / A[i][i];
+		}
+	}
+	return x;
+}
+
