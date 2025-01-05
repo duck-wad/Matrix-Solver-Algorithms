@@ -53,12 +53,27 @@ std::vector<std::vector<T>> Transpose(const std::vector<std::vector<T>>& matrix)
 template<typename T>
 bool isSingular(const std::vector<std::vector<T>>& matrix) {
 
-	bool s = false;
-
 	for (size_t i = 0; i < matrix.size(); i++) {
 		if(matrix[i][i] < LOW_TOL){
-			s = true;
+			return true;
 		}
 	}
-	return s;
+	return false;
+}
+
+template<typename T>
+bool isSymmetric(const std::vector<std::vector<T>>& matrix) {
+
+	if (matrix.size() != matrix[0].size()) {
+		return false;
+	}
+
+	for (size_t i = 0; i < matrix.size(); i++) {
+		for (size_t j = 0; j < matrix.size(); j++) {
+			if (matrix[i][j] != matrix[j][i]) {
+				return false;
+			}
+		}
+	}
+	return true;
 }

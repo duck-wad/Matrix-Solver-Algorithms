@@ -12,13 +12,14 @@ void PrintVector(const std::vector<double>& vec) {
 
 int main() {
 	std::vector<std::vector<double>> A = {
-		{1.0, 1.0, 0.0},
-		{-2.0, -1.0, 2.0},
-		{3.0, 6.0, 7.0}
+		{25, 15, -5},
+		{15, 18, 0},
+		{-5, 0, 11}
 	};
-	std::vector<double> b = { 5.0, -10.0, 14.0 };
 
-	std::vector<double> x = LUDecomposition(A, b);
+	std::vector<double> b = { 5.0, -10.0, 14.0};
+
+	std::vector<double> x = CholeskyDecomposition(A, b);
 
 	PrintVector(x);
 

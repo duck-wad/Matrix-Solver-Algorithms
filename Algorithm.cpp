@@ -50,6 +50,50 @@ std::vector<double> LUDecomposition(const std::vector<std::vector<double>>& A, c
 	return x;
 }
 
+//use Cholesky for symmetric A matrix
+std::vector<double> CholeskyDecomposition(const std::vector<std::vector<double>>& A, const std::vector<double>& b) {
+
+	if (A.size() != b.size() || A[0].size() != b.size()) {
+		throw std::invalid_argument("Matrix and vector must have same dimensions");
+	}
+	//make sure matrix is symmetric
+	if (!isSymmetric(A)) {
+		throw std::invalid_argument("Matrix must be symmetric for Cholesky decomposition");
+	}
+
+	//fill in L
+	std::vector<std::vector<double>> L(A.size(), std::vector<double>(A.size(), 0.0));
+
+	for (size_t k = 0; k < A.size(); k++) {
+		for (size_t i = 0; i < k; i++) {
+			double sum = 0.0;
+			for (size_t j = 0; j < i; j++) {
+				sum += L[i][j] * L[k][j];
+			}
+			L[k][i] = (A[k][i] - sum) / L[i][i];
+		}
+		//compute the diagonal
+		double sum = 0.0;
+		for (size_t j = 0; j < k; j++) {
+			sum += L[k][j] * L[k][j];
+		}
+		L[k][k] = std::sqrt(A[k][k]-sum);
+	}
+
+	if (isSingular(L)) {
+		throw std::invalid_argument("Matrix is singular, system cannot be solved for a unique solution");
+	}
+
+	std::vector<std::vector<double>> LT = Transpose(L);
+
+	//perform forward substitution using L and b to get D
+	std::vector<double> D = ForwardSubstitution(L, b);
+	//then use backward substitution to get x
+	std::vector<double> x = BackwardSubstitution(LT, D);
+
+	return x;
+}
+
 //if L needs to be filled, the function expects L to be sized before being passed in
 void ForwardElimination(std::vector<std::vector<double>>& A, std::vector<double>& b, std::vector<std::vector<double>>& L) {
 
