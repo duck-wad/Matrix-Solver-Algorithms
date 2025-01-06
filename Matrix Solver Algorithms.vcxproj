@@ -132,7 +132,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Algorithm.h" />
-    <ClInclude Include="Matrix.h" />
+    <ClInclude Include="MatrixOperations.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

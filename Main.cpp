@@ -2,13 +2,7 @@
 #include <vector>
 
 #include "Algorithm.h"
-#include "Matrix.h"
-
-void PrintVector(const std::vector<double>& vec) {
-	for (size_t i = 0; i < vec.size(); i++) {
-		std::cout << vec[i] << std::endl;
-	}
-}
+#include "MatrixOperations.h"
 
 int main() {
 	std::vector<std::vector<double>> A = {
@@ -19,9 +13,15 @@ int main() {
 
 	std::vector<double> b = { 5.0, -10.0, 14.0};
 
-	std::vector<double> x = CholeskyDecomposition(A, b);
+	std::cout << "A matrix: " << std::endl;
+	PrintMatrix(A);
+	std::cout << "b vector: " << std::endl;
+	PrintVector(b);
 
-	PrintVector(x);
+	GaussianElimination(A, b);
+	LUDecomposition(A, b);
+	CholeskyDecomposition(A, b);
+	GaussSeidel(A, b, 0.0001, 100);
 
 	return 0;
 }

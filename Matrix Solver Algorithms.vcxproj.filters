@@ -26,7 +26,7 @@
     <ClInclude Include="Algorithm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Matrix.h">
+    <ClInclude Include="MatrixOperations.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

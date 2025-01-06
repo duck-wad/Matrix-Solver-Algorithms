@@ -1,8 +1,10 @@
 #include "Algorithm.h"
-#include "Matrix.h"
+#include "MatrixOperations.h"
+
+/* START OF MATRIX SOLVING ALGORITHM FUNCTIONS */
 
 //gaussian elimination using forward elimination to get A to REF, and then backward substitution to solve for x
-std::vector<double> GaussianElimination(const std::vector<std::vector<double>>& A, const std::vector<double>& b) {
+void GaussianElimination(const std::vector<std::vector<double>>& A, const std::vector<double>& b) {
 
 	if (A.size() != b.size() || A[0].size() != b.size()) {
 		throw std::invalid_argument("Matrix and vector must have same dimensions");
@@ -20,11 +22,12 @@ std::vector<double> GaussianElimination(const std::vector<std::vector<double>>& 
 
 	std::vector<double> x = BackwardSubstitution(A_REF, b_REF);
 
-	return x;
+	std::cout << "Results from Gaussian Elimination: " << std::endl;
+	PrintVector(x);
 }
 
 //LU decomposition uses forward elimination to decompose A into L and U, forward substitution to get D, then backward substitution to get x
-std::vector<double> LUDecomposition(const std::vector<std::vector<double>>& A, const std::vector<double>& b) {
+void LUDecomposition(const std::vector<std::vector<double>>& A, const std::vector<double>& b) {
 
 	if (A.size() != b.size() || A[0].size() != b.size()) {
 		throw std::invalid_argument("Matrix and vector must have same dimensions");
@@ -47,11 +50,12 @@ std::vector<double> LUDecomposition(const std::vector<std::vector<double>>& A, c
 	//then use backward substitution to get x
 	std::vector<double> x = BackwardSubstitution(U, D);
 
-	return x;
+	std::cout << "Results from LU Decomposition: " << std::endl;
+	PrintVector(x);
 }
 
 //use Cholesky for symmetric A matrix
-std::vector<double> CholeskyDecomposition(const std::vector<std::vector<double>>& A, const std::vector<double>& b) {
+void CholeskyDecomposition(const std::vector<std::vector<double>>& A, const std::vector<double>& b) {
 
 	if (A.size() != b.size() || A[0].size() != b.size()) {
 		throw std::invalid_argument("Matrix and vector must have same dimensions");
@@ -91,8 +95,56 @@ std::vector<double> CholeskyDecomposition(const std::vector<std::vector<double>>
 	//then use backward substitution to get x
 	std::vector<double> x = BackwardSubstitution(LT, D);
 
-	return x;
+	std::cout << "Results from Cholesky Decomposition: " << std::endl;
+	PrintVector(x);
 }
+
+void GaussSeidel(const std::vector<std::vector<double>>& A, const std::vector<double>& b, const double errorTol, const int maxIter) {
+	if (A.size() != b.size() || A[0].size() != b.size()) {
+		throw std::invalid_argument("Matrix and vector must have same dimensions");
+	}
+	//initialize guess to zero
+	std::vector<double> x(A.size(), 0.0);
+	int numIter = 0;
+
+	for (size_t iter = 0; iter < maxIter; iter++) {
+		numIter = iter + 1;
+		//store results from previous iteration
+		std::vector<double> x_old = x;
+		//compute the solution for each row sequentially starting with the first row
+		for (size_t i = 0; i < A.size(); i++) {
+			double sum = 0.0;
+			for (size_t j = 0; j < i; j++) {
+				sum += A[i][j] * x[j];
+			}
+			for (size_t j = i + 1; j < A.size(); j++) {
+				sum += A[i][j] * x_old[j];
+			}
+			//update result for current iteration
+			x[i] = (b[i] - sum) / A[i][i];
+		}
+		//check convergence. error for each value must be below tolerance
+		bool errorFlag = false;
+		for (size_t i = 0; i < A.size(); i++) {
+			double error = (x[i] - x_old[i]) / x[i];
+			if (error > errorTol) errorFlag = true;
+		}
+		if (!errorFlag) break;
+		
+	}
+	
+	if (numIter == maxIter) {
+		throw std::runtime_error("Gauss-Seidel method failed to converge within maximum iterations");
+	}
+
+	std::cout << "Results from Gauss-Seidel iterative method: " << std::endl;
+	PrintVector(x);
+	std::cout << "Iterations required: " << numIter << std::endl;
+}
+
+
+
+/* START OF HELPER FUNCTIONS */
 
 //if L needs to be filled, the function expects L to be sized before being passed in
 void ForwardElimination(std::vector<std::vector<double>>& A, std::vector<double>& b, std::vector<std::vector<double>>& L) {
