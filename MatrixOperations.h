@@ -73,7 +73,7 @@ template<typename T>
 bool isSingular(const std::vector<std::vector<T>>& matrix) {
 
 	for (size_t i = 0; i < matrix.size(); i++) {
-		if(matrix[i][i] < LOW_TOL){
+		if(std::abs(matrix[i][i]) < LOW_TOL){
 			return true;
 		}
 	}
